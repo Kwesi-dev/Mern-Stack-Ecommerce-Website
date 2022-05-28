@@ -32,7 +32,7 @@ function App() {
                   <ProductList/>
                 </Route>
                 <Route path="/cart">
-                  <Cart/>
+                  {user ? <Cart/> : <Redirect to="login"/>}
                 </Route>
                 <Route path="/success">
                   <Success/>

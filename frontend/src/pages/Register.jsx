@@ -1,6 +1,8 @@
 import styled from "styled-components"
 import { mobile } from "../responsive";
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
+import { useState } from "react";
+import { publicRequest } from "../requestMethods";
 const Container = styled.div`
     position: relative; 
     width: 100vw;
@@ -12,7 +14,7 @@ const Container = styled.div`
     background-color: crimson;
 `;
 const Wrapper = styled.div`
-    width: 40%;
+    width: 320px;
     padding: 20px;
     background-color: white;
     ${mobile({width: "70%"})}
@@ -36,7 +38,7 @@ const Aggreement = styled.span`
     margin: 20px 0;
 `;
 const Button = styled.button`
-    width: 40%;
+    width: 60%;
     border: none;
     padding: 15px 20px;
     background-color: teal;
@@ -61,23 +63,48 @@ const LoginButton = styled.button`
     align-items: center;
     justify-content: center;
 `;
-
+const RegisterError = styled.p`
+    font-size: 1rem;
+    color: red;
+    text-align: center;
+    margin-top: 5px;
+`;
 const Register = () => {
+    const [username, setUsername] = useState("")
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [registerError, setRegisterError] = useState(false)
+    const history = useHistory()
+    const newUser = {
+        username,
+        email,
+        password
+    }
+
+    const handleRegister = async (e) => {
+        e.preventDefault()
+        try{
+            await publicRequest.post("/auth/register", newUser)
+            history.push("/login")
+        }catch{
+            setRegisterError(true)
+        }
+    }
     return (
         <Container>
             <Wrapper>
                 <Title>CREATE AN ACCOUNT</Title>
-                <Form>
-                    <Input placeholder="firstname"/>
-                    <Input placeholder="lastname"/>
-                    <Input placeholder="username"/>
-                    <Input placeholder="email"/>
-                    <Input placeholder="password"/>
-                    <Input placeholder="confirm password"/>
+                <Form onSubmit={handleRegister}>
+                    <Input type="text" name="username" placeholder="username" onChange={(e)=>setUsername(e.target.value)}/>
+                    <Input type="email" name="email" placeholder="email" onChange={(e)=>setEmail(e.target.value)}/>
+                    <Input type="password" name="password" placeholder="password" onChange={(e)=>setPassword(e.target.value)}/>
                     <Aggreement>By creating an account, I consent to the processing of my personal
                         data in accordance with the <strong>PRIVACY POLICY</strong>
                     </Aggreement>
-                    <Button>CREATE</Button>
+                    <Button type="submit">CREATE</Button>
+                    {registerError && 
+                        <RegisterError> Registration failed due to an error</RegisterError>
+                    }
                 </Form>
             </Wrapper>
             <Link to="/login">
